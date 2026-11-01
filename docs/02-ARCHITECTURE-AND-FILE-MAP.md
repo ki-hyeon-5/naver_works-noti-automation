@@ -53,10 +53,16 @@ Task 4에서 `src/core/excel_importer.py`, `src/core/matcher.py`,
 `ExcelImporter.submit_import()`로 호출자 소유 Worker에 제출할 수 있다.
 매칭은 담당자 표시명과 Jira 계정 식별자를 구분하고, 묶음은 모든 구성원 쌍의
 적합성을 확인한다. Excel 읽기는 `requirements.txt`의 `openpyxl`에 의존한다.
+Task 5에서 `src/application/workflow.py`와 PySide6 입력·검토 화면을 추가했다.
+Workflow는 검토·중복·묶음·등록 차단 상태를 Qt 없이 관리한다. 루트 `main.py`는
+명시적으로 Mock 발신기만 연결하며 실 Jira I/O는 수행하지 않는다.
 
 ```text
 src/
 ├── __init__.py
+├── application/
+│   ├── __init__.py
+│   └── workflow.py                # 검토 상태, 묶음 승인, 중복/전송 게이트
 ├── main.py                          # 앱 부트스트랩 및 GUI 진입점
 ├── core/
 │   ├── __init__.py
@@ -84,6 +90,7 @@ src/
     └── widgets/
         ├── alarm_input_pane.py      # 알람 텍스트 입력 및 통계 표시
         └── noti_review_pane.py      # 노티 미리보기, 수정, 개별/묶음 토글
+main.py                            # 루트 실행 진입점
 ```
 
 ---
