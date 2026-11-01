@@ -1,7 +1,10 @@
-"""Single review mode GUI with explicit registration controls."""
+"""Single review mode GUI with explicit registration and offline help controls."""
 
-from PySide6.QtCore import Qt, QThread
-from PySide6.QtGui import QAction, QShortcut, QKeySequence
+import sys
+from pathlib import Path
+
+from PySide6.QtCore import Qt, QThread, QUrl
+from PySide6.QtGui import QAction, QShortcut, QKeySequence, QDesktopServices
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QListWidget,
                                QMainWindow, QMessageBox, QPushButton, QRadioButton,
                                QSplitter, QVBoxLayout, QWidget)
@@ -60,6 +63,10 @@ class MainWindow(QMainWindow):
                              "Jira 연결은 아직 설정되지 않았습니다. 실서버 등록은 Task 7에서 연결합니다.")
         self.notice.setWordWrap(True)
         outer.addWidget(self.notice)
+        help_menu = self.menuBar().addMenu("도움말")
+        manual_action = QAction("사용설명서 열기", self)
+        help_menu.addAction(manual_action)
+        manual_action.triggered.connect(self.open_manual)
         self.input.parse_button.clicked.connect(self.parse)
         self.list.currentRowChanged.connect(self.select)
         self.save_review.clicked.connect(self.save_current)
@@ -79,6 +86,16 @@ class MainWindow(QMainWindow):
             menu.addAction(settings_action)
             admin_action.triggered.connect(self.open_admin)
             settings_action.triggered.connect(self.open_settings)
+
+    @staticmethod
+    def manual_path() -> Path:
+        root = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2]))
+        return root / "docs" / "manual" / "index.html"
+
+    def open_manual(self):
+        path = self.manual_path()
+        if not path.is_file() or not QDesktopServices.openUrl(QUrl.fromLocalFile(str(path))):
+            QMessageBox.warning(self, "사용설명서 열기 실패", f"로컬 매뉴얼을 열 수 없습니다: {path}")
 
     def open_admin(self):
         dialog = AdminDialog(MappingAdmin(self.auth, self.mapping_store),

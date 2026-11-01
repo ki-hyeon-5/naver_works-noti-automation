@@ -102,4 +102,5 @@ def test_journal_write_failure_prevents_create(tmp_path, monkeypatch):
 def test_tc07g_onedir_spec_keeps_data_outside_bundle():
     spec = (Path(__file__).resolve().parents[1] / "packaging" / "noti-automation.spec").read_text(encoding="utf-8")
     assert "COLLECT(" in spec and "exclude_binaries=True" in spec
-    assert "datas=[]" in spec
+    assert 'datas=[(str(project_root / "docs" / "manual"), "docs/manual")]' in spec
+    assert 'project_root / "data"' not in spec and 'project_root / "config"' not in spec

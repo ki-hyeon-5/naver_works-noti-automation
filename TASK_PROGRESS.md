@@ -1,7 +1,7 @@
 # 개발 진행 현황판 (TASK_PROGRESS.md)
 
 - **최종 업데이트:** 2026-11-02
-- **현재 진행 단계:** Task 7 자동 검증 통과, Task 1~7 수동 검증은 사용자 요청에 따라 완성본에서 진행 예정
+- **현재 진행 단계:** Task 8 자동 검증 통과, Task 1~8 Windows 수동 검증은 완성본에서 진행 예정
 - **규칙:** 각 Task는 자동 테스트 통과 후 `검토 대기`, 사용자 수동 검증 승인 후 `✅ 완료`로 변경한다. 실패/미검증을 완료로 표시하지 않는다.
 - **수동 검증 계획:** `docs/task별-수동-테스트-명세서.md`의 Task별 체크리스트를 완성본 기준으로 실행한다. 현재 macOS에서는 Task 1 core 로거 간편 확인을 별도로 수행할 수 있다. Task 5 Mock GUI는 Windows 전용 기본 중복 캐시 경로로 macOS 시작이 불가능하여 최종 Windows 11 환경에서 판정한다.
 - **사용자 확정 운영 방식:** 각 Task 종료 후 자동 테스트·체크리스트 갱신·명시적 `git add`·`git commit`·`git push`를 수행한다. Windows 11 수동 검증은 전체 Task 완성 후 사용자가 체크리스트를 실행해 결과를 전달한다. 그 전까지 상태는 `검토 대기`로 두고, 오류가 있으면 전달된 결과를 바탕으로 디버깅한다. macOS에서 바로 확인 가능한 부분은 별도로 안내한다.
@@ -19,7 +19,7 @@
 | **TASK-05** | UI 레이아웃 및 확인 후 등록 워크플로우 | TASK-03, 04 | 🔎 검토 대기 | 7 통과 | ⬜ | Mock 전송만 지원, Windows GUI 수동 검증 대기 |
 | **TASK-06** | 관리자 2탭 매핑 테이블 GUI 및 환경 설정 | TASK-02, 04 | 🔎 검토 대기 | 9 통과 | ⬜ | Windows DPAPI·GUI 수동 검증 대기 |
 | **TASK-07** | Jira 연동 클라이언트 (Mock/실서버) & 패키징 | TASK-05, 06 | 🔎 검토 대기 | 12 통과 | ⬜ | Mock 상태머신·장부, Windows onedir 실검증 대기 |
-| **TASK-08** | 오프라인 HTML 기능명세 및 사용설명서 | TASK-07 | ⬜ 대기 | - | ⬜ | file:// 호환, 검색, UI 동기화 |
+| **TASK-08** | 오프라인 HTML 기능명세 및 사용설명서 | TASK-07 | 🔎 검토 대기 | 3 통과 | ⬜ | file:// 브라우저·Windows onedir 실검증 대기 |
 
 ---
 
@@ -107,9 +107,15 @@
 - **수동 검증 결과:** 최종 완성 후 사용자 확인 예정. 완료 승인 전.
 
 ### [TASK-08] 오프라인 HTML 기능명세 및 사용설명서
-- **상태:** ⬜ 대기
+- **상태:** 🔎 검토 대기
 - **상세 지시서:** `docs/tasks/TASK-08.md`
 - **검증 명령:** `pytest tests/test_task8_manual_docs.py -v`
+- **자동 검증:** TC-08A~B 관련 3개 통과; 전체 `python -m pytest -q` 76개 통과 (macOS, uv 임시 환경). `node --check docs/manual/assets/manual.js` 통과. 브라우저 UI 접근 권한이 없어 실제 `file://` 화면 조작은 미검증.
+- **수정 파일:** `docs/manual/index.html`, `docs/manual/assets/style.css`, `docs/manual/assets/manual.js`, `src/ui/main_window.py`, `packaging/noti-automation.spec`, `tests/test_task8_manual_docs.py`, `tests/test_task7_jira_client.py`, `docs/manual/MANUAL-SPEC.md`, `docs/02-ARCHITECTURE-AND-FILE-MAP.md`, `docs/task별-수동-테스트-명세서.md`, `TASK_PROGRESS.md`.
+- **신규 의존성:** 없음. 기존 PySide6의 `QDesktopServices`로 로컬 매뉴얼을 연다.
+- **미해결 위험/범위:** 실제 Windows 11 PyInstaller onedir 배포 폴더와 오프라인 브라우저 실행은 미검증. 실 Jira 연동은 여전히 Mock만 제공하며 현장 스키마 검증 전에는 실서버 성공을 표시하지 않는다.
+- **수동 검증 방법:** `docs/task별-수동-테스트-명세서.md`의 TC-08A~B에 따라 네트워크를 차단하고 `file://` 또는 GUI `도움말` → `사용설명서 열기`로 열어 8개 목차, 검색 일치·결과 없음, 예시, 화면 문구, 배포 리소스를 확인한다.
+- **수동 검증 결과:** 최종 Windows 11 사용자 확인 예정. 완료 승인 전.
 
 
 ## 9. 표준 경로 규약

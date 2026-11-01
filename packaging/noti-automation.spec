@@ -8,7 +8,7 @@ analysis = Analysis(
     [str(project_root / "main.py")],
     pathex=[str(project_root)],
     binaries=[],
-    datas=[],
+    datas=[(str(project_root / "docs" / "manual"), "docs/manual")],
     hiddenimports=[],
     hookspath=[],
     runtime_hooks=[],

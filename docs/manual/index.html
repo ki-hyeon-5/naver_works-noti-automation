@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Noti Automation 사용설명서</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/manual.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#content">본문으로 건너뛰기</a>
+  <div class="layout">
+    <aside class="sidebar" aria-label="매뉴얼 목차">
+      <div class="brand"><span class="brand-mark">N</span><div><strong>Noti Automation</strong><small>오프라인 사용설명서</small></div></div>
+      <label class="search-label" for="manual-search">문서 검색</label>
+      <input id="manual-search" type="search" placeholder="예: NoData, 등록, 로그" autocomplete="off" aria-controls="content">
+      <p id="search-count" class="search-count" role="status" aria-live="polite">8개 섹션</p>
+      <nav aria-label="섹션 목차">
+        <ol>
+          <li><a href="#overview">시스템 개요와 실행</a></li>
+          <li><a href="#account">계정과 비밀번호</a></li>
+          <li><a href="#parsing">알람 복사와 파싱</a></li>
+          <li><a href="#format">노티와 Jira 제목</a></li>
+          <li><a href="#workflow">확인 후 등록</a></li>
+          <li><a href="#mapping">담당자 매칭과 관리자</a></li>
+          <li><a href="#excel">Excel 가져오기</a></li>
+          <li><a href="#settings">설정, 로그와 문제 해결</a></li>
+        </ol>
+      </nav>
+      <p class="sidebar-note">이 문서는 인터넷 연결 없이 열립니다. 현재 앱의 Jira 등록은 Mock이며 실서버에 이슈를 만들지 않습니다.</p>
+    </aside>
+
+    <main id="content">
+      <header class="hero">
+        <p class="eyebrow">운영자 가이드 · Windows 11</p>
+        <h1>알람 검토부터<br>등록 결과 확인까지</h1>
+        <p>Grafana 알람을 붙여넣고 담당자와 노티를 확인한 뒤, 승인한 건만 Mock Jira에 등록하는 순서로 사용합니다.</p>
+        <div class="hero-meta"><span>확인 후 등록</span><span>Grafana 지원 · SCP 미지원</span><span>실 Jira 연동 미검증</span></div>
+      </header>
+
+      <div id="no-results" class="empty" hidden>검색 결과가 없습니다. 다른 단어로 다시 검색하세요.</div>
+
+      <section id="overview" class="manual-section" data-title="시스템 개요 및 포터블 실행 가이드">
+        <div class="section-head"><span class="number">01</span><div><p class="eyebrow">시작하기</p><h2>시스템 개요 및 포터블 실행 가이드</h2></div></div>
+        <p>Windows 11용 <code>NotiAutomation/</code> 폴더를 원하는 위치에 풀고 <code>NotiAutomation.exe</code>를 실행합니다. 사용자 PC에 Python이나 외부 데이터베이스를 설치할 필요가 없습니다. 압축 폴더는 통째로 옮길 수 있지만 사용자 데이터는 Windows 사용자 프로필의 <code>%LOCALAPPDATA%/NotiAutomation/</code>에 저장됩니다.</p>
+        <div class="callout"><strong>업데이트</strong><p>앱을 종료하고 배포 폴더를 새 버전으로 교체합니다. <code>%LOCALAPPDATA%/NotiAutomation/</code>의 <code>data/</code>와 <code>config/</code>를 삭제하지 마세요. 같은 Windows 사용자 프로필에서 재실행합니다.</p></div>
+        <p>현재 버전은 Grafana 알람만 처리합니다. SCP 알람은 지원하지 않습니다. Jira 화면의 <code>MOCK-</code> 키는 로컬 시뮬레이션 결과이며 실제 이슈 키가 아닙니다.</p>
+      </section>
+
+      <section id="account" class="manual-section" data-title="계정 관리 및 비밀번호 재설정 정책">
+        <div class="section-head"><span class="number">02</span><div><p class="eyebrow">접근 관리</p><h2>계정 관리 및 비밀번호 재설정</h2></div></div>
+        <ol class="steps"><li><strong>회원가입</strong> 탭에서 <code>ID</code>, <code>이름</code>, <code>비밀번호</code>를 입력합니다.</li><li><strong>로그인</strong> 탭에서 ID와 비밀번호를 입력합니다.</li><li>분실 시 <strong>비밀번호 재설정</strong> 탭에서 <code>ID</code>와 <code>새 비밀번호</code>를 입력하고 <strong>ID로 비밀번호 재설정</strong>을 누릅니다.</li></ol>
+        <div class="callout danger"><strong>계정 탈취·서비스 방해 위험</strong><p>현재 정책은 ID만 알면 비밀번호를 재설정할 수 있습니다. 재설정 즉시 해당 계정의 개인 Jira API 토큰이 삭제되고 기존 로그인 세션이 무효화되지만, 이 조치가 계정 탈취 위험을 없애지는 못합니다. 토큰은 다시 입력해야 합니다.</p></div>
+      </section>
+
+      <section id="parsing" class="manual-section" data-title="알람 원문 복사 및 앵커 기반 자동 파싱">
+        <div class="section-head"><span class="number">03</span><div><p class="eyebrow">입력</p><h2>알람 원문 복사 및 자동 파싱</h2></div></div>
+        <p>Grafana 관제 표에서 알람 행의 값을 드래그해 복사한 뒤 메인 입력창에 붙여넣고 <strong>알람 분석</strong>을 누릅니다. 줄바꿈과 탭이 불규칙해도 <code>Firing</code>, <code>Start At</code> 일시, <code>Duration</code>을 기준으로 알람 경계를 찾습니다.</p>
+        <p><code>No Data</code> 값이 <code>NoData</code>이거나 Alert Name이 <code>DataSourceNoData</code>인 건은 검토 목록과 등록 대상에서 제외됩니다. 화면의 제외 건수·사유를 확인하세요. 파싱 실패 건은 별도로 표시되며 NoData로 간주하지 않습니다.</p>
+        <div class="callout"><strong>확인필요 항목</strong><p><code>Target</code>이 비었거나 <code>-</code>이면 대상없음, <code>Start At</code> 형식이 잘못되면 시간오류로 표시됩니다. <strong>수정·검토 저장</strong>에서 구조화된 값을 고치기 전에는 등록할 수 없습니다.</p></div>
+      </section>
+
+      <section id="format" class="manual-section" data-title="표준 노티 문구 및 Jira Summary 정제 규칙">
+        <div class="section-head"><span class="number">04</span><div><p class="eyebrow">출력 형식</p><h2>표준 노티 문구와 Jira 제목</h2></div></div>
+        <p>노티 미리보기는 다음 형식입니다. 신뢰할 수 있는 <code>클러스터 | 상세내용</code> 패턴일 때만 클러스터 줄이 추가됩니다.</p>
+        <pre><code>클러스터 : namespace  (있는 경우에만)
+
+서비스명 : server-01
+
+장애현상 : CPU high
+
+발생시간 : 26-10-11 01:57</code></pre>
+        <p><code>Duration</code>은 노티에 넣지 않습니다. 묶음 노티는 알람별 블록을 빈 줄로 연결합니다. Jira 제목에서는 Alert Name 앞의 연속 대괄호와 끝의 심각도 소괄호를 제거합니다.</p>
+        <div class="example"><span>예시</span><code>[Linux] CPU high (WARNING)</code><span class="arrow">→</span><code>[247][GRAFANA] server-01, CPU high</code></div>
+        <p>Grafana 매칭은 <code>[247][GRAFANA]</code>, N3R 매칭은 <code>[247][N3R]</code>를 씁니다. 양쪽 모두 미매칭이면 출처 태그를 빼고 <code>[247]</code>만 붙입니다. 양쪽 모두 매칭되면 <code>출처 태그</code>를 직접 선택합니다.</p>
+      </section>
+
+      <section id="workflow" class="manual-section" data-title="확인 후 등록 워크플로우 및 묶음 등록 조건">
+        <div class="section-head"><span class="number">05</span><div><p class="eyebrow">등록 승인</p><h2>확인 후 등록과 묶음 등록</h2></div></div>
+        <ol class="steps"><li>목록에서 알람을 선택해 <code>Target</code>, <code>장애현상</code>, <code>Start At</code>, <code>클러스터</code>, <code>Jira accountId</code>, <code>출처 태그</code>와 노티 본문을 확인합니다.</li><li>필요한 값을 고치고 <strong>이 알람 검토 완료</strong>를 체크한 뒤 <strong>수정·검토 저장</strong>을 누릅니다. <strong>전체 검토</strong>는 적격 건의 검토 표시를 돕습니다.</li><li><strong>개별 등록</strong> 또는 <strong>묶음 등록</strong>을 고릅니다. 묶음 등록이면 <strong>묶음 구성 확인</strong>으로 분할 결과를 확인합니다.</li><li><strong>선택 등록</strong> 또는 <strong>전체 등록</strong>을 누릅니다. 전체 등록은 적격 건만 전송하며 차단 건은 이유를 표시합니다.</li></ol>
+        <p>노티 편집창에서 <kbd>Enter</kbd>는 줄바꿈입니다. <kbd>Ctrl</kbd>+<kbd>Enter</kbd>는 선택 등록을 요청하지만 검토·승인 조건을 통과해야 합니다. 자동 등록 모드는 없습니다.</p>
+        <div class="callout"><strong>묶음의 4가지 조건</strong><ol><li>묶음 등록을 선택했다.</li><li>담당자가 동일하다.</li><li>비어 있지 않은 출처 태그가 동일하다.</li><li>Target 또는 정제된 Alert Name이 동일하다.</li></ol><p>모든 구성원 쌍이 조건을 만족해야 합니다. 불일치 건은 개별 이슈로 분할됩니다.</p></div>
+        <p>당일 동일한 <code>Target | 정제 Alert Name | Start At</code>은 중복 경고 후 명시적으로 확인한 경우에만 다시 등록됩니다. <code>UNKNOWN</code>(생성여부불명)과 <code>PARTIAL_FAILED</code>(부분실패)는 일반 중복 확인으로 우회할 수 없습니다. Jira에서 생성 여부와 기존 이슈를 수동 대조하세요. 생성 후 담당자·참조자 후속 작업이 실패해도 새 이슈 생성은 자동 재호출되지 않습니다.</p>
+        <p>등록 중에는 <strong>Mock Jira 요청 중…</strong>이 표시됩니다. 결과 목록의 <code>DONE</code>, <code>PARTIAL_FAILED</code>, <code>UNKNOWN</code>, <code>FAILED</code> 상태와 <code>MOCK-</code> 키를 확인하세요. 현재 실 Jira 전송은 제공하지 않습니다.</p>
+      </section>
+
+      <section id="mapping" class="manual-section" data-title="담당자 매칭 충돌 대처 및 관리자 2탭 매핑 DB 관리">
+        <div class="section-head"><span class="number">06</span><div><p class="eyebrow">매핑 관리</p><h2>담당자 매칭과 관리자 2탭</h2></div></div>
+        <p>상단 <strong>관리</strong> 메뉴의 <strong>관리자 매핑</strong>을 엽니다. 최초에는 <strong>최초 관리자 비밀번호 설정</strong> 후 <strong>관리자 승인</strong>을 누릅니다. 승인 전 <strong>Grafana</strong>·<strong>N3R</strong> 탭은 비활성화됩니다.</p>
+        <p>각 탭에서 <strong>매핑 행 검색</strong>, <strong>행 추가</strong>, <strong>선택 행 수정</strong>, <strong>선택 행 삭제</strong>를 사용합니다. 변경 뒤 알람 분석을 다시 실행해 새 매칭을 적용합니다. 실제 Jira accountId가 없으면 담당자를 선택해도 등록할 수 없습니다.</p>
+        <div class="callout"><strong>충돌 처리</strong><p>두 DB가 모두 매칭되면 담당자가 같아도 출처를 선택해야 합니다. 담당자도 다르면 담당자와 출처를 함께 선택합니다. 미매칭이면 유효한 기본 담당자를 적용할 수 있고, 설정이 없거나 유효하지 않으면 등록이 차단됩니다.</p></div>
+      </section>
+
+      <section id="excel" class="manual-section" data-title="Excel 가져오기 Append 및 중복 검출 가이드">
+        <div class="section-head"><span class="number">07</span><div><p class="eyebrow">데이터 가져오기</p><h2>Excel 가져오기와 중복 검출</h2></div></div>
+        <p>관리자 승인 후 <strong>Grafana</strong> 또는 <strong>N3R</strong> 탭에서 <strong>Excel 가져오기</strong>를 눌러 해당 DB용 파일을 선택합니다. 가져오기 중 버튼이 잠기며 기존 DB에 행을 추가(Append)합니다. 원본 Excel은 수정하지 않습니다.</p>
+        <p>동일 키·동일 내용은 건너뛰고, 동일 키에 담당자나 내용이 다르면 자동 덮어쓰지 않습니다. 충돌 창에서 <strong>신규 반영</strong>(예), <strong>기존 유지</strong>(아니오), <strong>결정 보류</strong>(취소)를 행별로 고릅니다. 오류·충돌 건수를 확인한 후 매핑 탭을 다시 확인하세요.</p>
+      </section>
+
+      <section id="settings" class="manual-section" data-title="환경설정 3단계 Fallback 로그 확인 및 문제 해결">
+        <div class="section-head"><span class="number">08</span><div><p class="eyebrow">운영과 복구</p><h2>설정, 로그와 문제 해결</h2></div></div>
+        <p><strong>관리</strong> → <strong>사용자 설정</strong>에서 로그 경로·연월 폴더, 기본 담당자 이름과 Jira accountId, 복수 에픽과 기본 에픽, 기본·알람별 참조자, 보고자, 개인 Jira 토큰을 관리합니다. 토큰은 다시 표시되지 않고 별도 Windows 보호 저장소에 보관됩니다. 실 Jira 필드 매핑은 미검증이며 Mock 상태입니다.</p>
+        <div class="path-card"><strong>로그 저장 위치</strong><ol><li>설정한 경로</li><li><code>C:\noti-log</code></li><li><code>%LOCALAPPDATA%\NotiAutomation\logs</code></li></ol><p>연월 폴더 ON: <code>YYYY\MM\YYYY-MM-DD.txt</code> · OFF: <code>YYYY-MM-DD.txt</code>. 모두 실패해도 이미 받은 등록 결과는 바뀌지 않으며 비영구 기록 실패 경고를 확인해야 합니다.</p></div>
+        <h3>문제 해결 FAQ</h3>
+        <dl><dt>등록 버튼이 막힙니다.</dt><dd><code>Target</code>·<code>Start At</code>·Jira accountId·출처 선택·검토 체크·묶음 확인·중복 확인을 차례로 점검하세요. NoData는 전송되지 않습니다.</dd><dt><code>UNKNOWN</code> 또는 <code>PARTIAL_FAILED</code>입니다.</dt><dd>등록 장부 <code>%LOCALAPPDATA%/NotiAutomation/data/registration_journal.json</code>과 Jira를 수동 대조하세요. 같은 알람을 바로 재등록하지 마세요.</dd><dt>암호화 매핑이 열리지 않습니다.</dt><dd>원래 Windows 사용자 프로필에서 실행하고 관리자에게 원본 Excel과 백업 복구를 요청하세요. 데이터·키 파일을 임의로 삭제하지 마세요.</dd><dt>설정한 로그 경로에 파일이 없습니다.</dt><dd>기본 경로와 LOCALAPPDATA 대체 경로를 순서대로 확인하세요.</dd></dl>
+      </section>
+
+      <footer>Noti Automation · 로컬 사용설명서 · 실제 Jira 연동은 현장 스키마 확인 전까지 비활성</footer>
+    </main>
+  </div>
+</body>
+</html>

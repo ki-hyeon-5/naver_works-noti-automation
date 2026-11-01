@@ -66,6 +66,9 @@ Task 7에서 `src/core/jira_client.py`의 Mock 어댑터·상태 머신과
 `src/core/registration_journal.py`의 원자적 등록 장부를 연결했다. 실제 Jira
 필드 검증 전에는 Mock만 실행한다. `src/ui/workers.py`는 Jira 등록을 QThread에서
 실행하며, `packaging/noti-automation.spec`는 Windows onedir 빌드 정의다.
+Task 8에서 `docs/manual/index.html`과 로컬 CSS·JavaScript를 추가했다.
+메인 `도움말` 메뉴는 저장소 또는 PyInstaller 리소스 경로에서 매뉴얼을 열고,
+onedir 설정은 매뉴얼 디렉터리를 실행 파일에 포함한다.
 
 ```text
 src/
@@ -105,6 +108,8 @@ src/
         └── noti_review_pane.py      # 노티 미리보기, 수정, 개별/묶음 토글
 main.py                            # 루트 실행 진입점
 packaging/noti-automation.spec      # Windows PyInstaller onedir 설정
+docs/manual/index.html              # file:// 오프라인 사용설명서
+docs/manual/assets/                 # 로컬 스타일·검색 스크립트
 ```
 
 ---
