@@ -1,7 +1,7 @@
 # 개발 진행 현황판 (TASK_PROGRESS.md)
 
 - **최종 업데이트:** 2026-11-02
-- **현재 진행 단계:** Task 5 자동 검증 통과, Task 1~5 수동 검증은 사용자 요청에 따라 완성본에서 진행 예정
+- **현재 진행 단계:** Task 6 자동 검증 통과, Task 1~6 수동 검증은 사용자 요청에 따라 완성본에서 진행 예정
 - **규칙:** 각 Task는 자동 테스트 통과 후 `검토 대기`, 사용자 수동 검증 승인 후 `✅ 완료`로 변경한다. 실패/미검증을 완료로 표시하지 않는다.
 - **수동 검증 계획:** `docs/task별-수동-테스트-명세서.md`의 Task별 체크리스트를 완성본 기준으로 실행한다. 현재 macOS에서는 Task 1 core 로거 간편 확인을 별도로 수행할 수 있다. Task 5 Mock GUI는 Windows 전용 기본 중복 캐시 경로로 macOS 시작이 불가능하여 최종 Windows 11 환경에서 판정한다.
 - **사용자 확정 운영 방식:** 각 Task 종료 후 자동 테스트·체크리스트 갱신·명시적 `git add`·`git commit`·`git push`를 수행한다. Windows 11 수동 검증은 전체 Task 완성 후 사용자가 체크리스트를 실행해 결과를 전달한다. 그 전까지 상태는 `검토 대기`로 두고, 오류가 있으면 전달된 결과를 바탕으로 디버깅한다. macOS에서 바로 확인 가능한 부분은 별도로 안내한다.
@@ -17,7 +17,7 @@
 | **TASK-03** | 앵커 기반 Grafana 알람 파서 및 포맷터 | TASK-01 | 🔎 검토 대기 | 12 통과 | ⬜ | 합성 입력 검증, 실제 클립보드 원문 검증 대기 |
 | **TASK-04** | Excel 2종 임포터 및 담당자 매칭 엔진 | TASK-02, 03 | 🔎 검토 대기 | 13 통과 | ⬜ | 합성 Excel 검증, Windows GUI 수동 검증 대기 |
 | **TASK-05** | UI 레이아웃 및 확인 후 등록 워크플로우 | TASK-03, 04 | 🔎 검토 대기 | 7 통과 | ⬜ | Mock 전송만 지원, Windows GUI 수동 검증 대기 |
-| **TASK-06** | 관리자 2탭 매핑 테이블 GUI 및 환경 설정 | TASK-02, 04 | ⬜ 대기 | - | ⬜ | 관리자 인증, Excel Append GUI |
+| **TASK-06** | 관리자 2탭 매핑 테이블 GUI 및 환경 설정 | TASK-02, 04 | 🔎 검토 대기 | 9 통과 | ⬜ | Windows DPAPI·GUI 수동 검증 대기 |
 | **TASK-07** | Jira 연동 클라이언트 (Mock/실서버) & 패키징 | TASK-05, 06 | ⬜ 대기 | - | ⬜ | 6단계 상태머신, onedir 패키징 |
 | **TASK-08** | 오프라인 HTML 기능명세 및 사용설명서 | TASK-07 | ⬜ 대기 | - | ⬜ | file:// 호환, 검색, UI 동기화 |
 
@@ -84,9 +84,16 @@
 - **수동 검증 결과:** 완성본에서 사용자 확인 예정. 완료 승인 전.
 
 ### [TASK-06] 관리자 2탭 매핑 테이블 GUI 및 환경 설정
-- **상태:** ⬜ 대기
+- **상태:** 🔎 검토 대기
 - **상세 지시서:** `docs/tasks/TASK-06.md`
 - **검증 명령:** `pytest tests/test_task6_admin_settings.py -v`
+- **자동 검증:** TC-06A~TC-06C 관련 9개 통과; 전체 `python -m pytest -q` 61개 통과 (macOS, Qt offscreen, 테스트 보호자 주입). 실제 Windows DPAPI 동작은 검증하지 않음.
+- **수정 파일:** `src/core/mapping_admin.py`, `src/core/settings_store.py`, `src/ui/auth_dialog.py`, `src/ui/admin_dialog.py`, `src/ui/settings_dialog.py`, `src/ui/main_window.py`, `src/main.py`, `tests/test_task6_admin_settings.py`, `docs/02-ARCHITECTURE-AND-FILE-MAP.md`, `docs/manual/MANUAL-SPEC.md`, `docs/task별-수동-테스트-명세서.md`, `TASK_PROGRESS.md`.
+- **신규 의존성:** 없음. 기존 PySide6-Essentials·openpyxl·cryptography 사용.
+- **자가 수정 내역:** 설정 저장 후 토큰 저장 실패를 부분실패로 명시하고, Excel 충돌에 행별 결정 보류 선택지를 추가. UI 버튼 경로의 저장·검색·비동기 가져오기 테스트 보강.
+- **미해결 위험/범위:** 실 Jira 필드 스키마·계정 ID는 확인되지 않아 설정의 환경 상태는 MOCK/UNVERIFIED만 허용한다. 관리자 비밀번호 최초 설정과 Windows DPAPI 보호 토큰은 실제 Windows 11에서 미검증. macOS에서 기본 앱 실행은 Windows 전용 경로 및 DPAPI로 불가. Excel 가져오기 Worker의 현장 Excel 형식과 대량 행 UI 응답성도 Windows 실측 대기.
+- **수동 검증 방법:** `docs/task별-수동-테스트-명세서.md`의 TASK-06 TC-06A~C를 최종 Windows 11 배포본과 합성 계정·Excel에서 수행. 미승인 차단, 승인 후 두 탭 CRUD 재시작 유지, 충돌 선택, 설정·토큰 분리 저장과 UI 응답을 확인한다.
+- **수동 검증 결과:** 최종 완성 후 사용자 확인 예정. 완료 승인 전.
 
 ### [TASK-07] Jira 연동 클라이언트 및 onedir 패키징
 - **상태:** ⬜ 대기

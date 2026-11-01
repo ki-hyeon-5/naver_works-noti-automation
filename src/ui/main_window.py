@@ -1,7 +1,7 @@
 """Single review mode GUI with explicit registration controls."""
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QShortcut, QKeySequence
+from PySide6.QtGui import QAction, QShortcut, QKeySequence
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QListWidget,
                                QMainWindow, QMessageBox, QPushButton, QRadioButton,
                                QSplitter, QVBoxLayout, QWidget)
@@ -9,14 +9,24 @@ from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QListWidget,
 from src.application.workflow import Workflow
 from src.core.formatter import noti_body
 from src.core.matcher import AssigneeIdentity
+from src.core.crypto_store import StorageError
+from src.core.excel_importer import ExcelImporter
+from src.core.mapping_admin import MappingAdmin
+from src.core.matcher import MappingMatcher
+from src.core.settings_store import SettingsError
+from .admin_dialog import AdminDialog
+from .settings_dialog import SettingsDialog
 from .widgets.alarm_input_pane import AlarmInputPane
 from .widgets.noti_review_pane import NotiReviewPane
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, workflow: Workflow | None = None):
+    def __init__(self, workflow: Workflow | None = None, *, auth=None, session=None,
+                 mapping_store=None, settings_store=None):
         super().__init__()
         self.workflow = workflow or Workflow()
+        self.auth, self.session = auth, session
+        self.mapping_store, self.settings_store = mapping_store, settings_store
         self.setWindowTitle("Noti Automation — 확인 후 등록")
         self.resize(1100, 740)
         root = QWidget()
@@ -58,6 +68,35 @@ class MainWindow(QMainWindow):
         self.register_all.clicked.connect(lambda: self.register(True))
         self.shortcut = QShortcut(QKeySequence("Ctrl+Return"), self)
         self.shortcut.activated.connect(lambda: self.register(False))
+        if auth and session and mapping_store and settings_store:
+            menu = self.menuBar().addMenu("관리")
+            admin_action = QAction("관리자 매핑", self)
+            settings_action = QAction("사용자 설정", self)
+            menu.addAction(admin_action)
+            menu.addAction(settings_action)
+            admin_action.triggered.connect(self.open_admin)
+            settings_action.triggered.connect(self.open_settings)
+
+    def open_admin(self):
+        dialog = AdminDialog(MappingAdmin(self.auth, self.mapping_store),
+                             ExcelImporter(self.mapping_store), self)
+        dialog.exec()
+        try:
+            self.workflow.matcher = MappingMatcher.from_store(self.mapping_store)
+            self.notice.setText("매핑을 다시 읽었습니다. 기존 입력은 알람 분석을 다시 실행해 매칭하세요.")
+        except StorageError as exc:
+            self.notice.setText(f"{exc.code}: {exc.action}")
+
+    def open_settings(self):
+        dialog = SettingsDialog(self.auth, self.session, self.settings_store, self)
+        dialog.exec()
+        try:
+            saved = self.settings_store.load(self.session)
+            self.workflow.default_assignee = (AssigneeIdentity(saved.default_assignee_name,
+                                                       saved.default_assignee_account_id)
+                                              if saved.default_assignee_account_id else None)
+        except SettingsError as exc:
+            self.notice.setText(f"{exc.code}: {exc.action}")
 
     def parse(self):
         batch = self.workflow.load(self.input.raw.toPlainText())

@@ -56,6 +56,12 @@ Task 4에서 `src/core/excel_importer.py`, `src/core/matcher.py`,
 Task 5에서 `src/application/workflow.py`와 PySide6 입력·검토 화면을 추가했다.
 Workflow는 검토·중복·묶음·등록 차단 상태를 Qt 없이 관리한다. 루트 `main.py`는
 명시적으로 Mock 발신기만 연결하며 실 Jira I/O는 수행하지 않는다.
+Task 6에서 `src/core/mapping_admin.py`와 `src/core/settings_store.py`를 추가했다.
+전자는 관리자 비밀번호 승인 후 암호화 매핑 CRUD를 수행하고, 후자는 로그인 세션별
+설정을 원자적으로 저장한다. 토큰은 설정 JSON이 아니라 기존 `AuthManager`의
+DPAPI 보호 파일에 보관한다. `src/ui/auth_dialog.py`, `admin_dialog.py`,
+`settings_dialog.py`는 Windows 진입점과 메인 메뉴에 연결된다. Excel 가져오기는
+호출자 소유 Executor에서 실행하며 실 Jira 필드는 여전히 Mock 상태다.
 
 ```text
 src/
@@ -71,6 +77,8 @@ src/
 │   ├── logger.py                    # 3단계 Fallback 날짜별 TXT 로거
 │   ├── crypto_store.py              # AES-GCM 파일 암호화 및 DPAPI 래핑 키
 │   ├── auth_manager.py              # 회원가입, 로그인, 토큰 초기화형 비밀번호 재설정
+│   ├── mapping_admin.py             # 관리자 승인 게이트와 암호화 매핑 CRUD
+│   ├── settings_store.py            # 세션별 비밀값 제외 설정 JSON 저장
 │   ├── parsers/
 │   │   ├── __init__.py
 │   │   ├── base_parser.py           # 파서 추상 인터페이스
