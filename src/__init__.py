@@ -1,0 +1,1 @@
+"""Noti automation application package."""
