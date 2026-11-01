@@ -1,0 +1,101 @@
+# ==========================================
+# Noti Automation - .gitignore
+# ==========================================
+
+# 1. Python 캐시 및 컴파일 파일
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+
+# 2. Python 가상환경
+.venv/
+venv/
+env/
+ENV/
+
+# 3. 테스트 및 코드 분석 캐시
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.hypothesis/
+
+# 4. PyInstaller 빌드 결과
+build/
+dist/
+*.spec
+
+# 5. 실제 운영 데이터
+data/
+config/
+logs/
+*.dat
+*.db
+*.sqlite
+*.sqlite3
+
+# 6. 인증정보 및 환경변수
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*credentials.json
+*secrets.json
+
+# 7. 로그 및 임시 파일
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# 8. 실제 Excel 담당자 데이터
+*.xlsx
+*.xls
+*.xlsm
+
+# 9. IDE 설정
+.vscode/
+.idea/
+
+# 10. macOS 시스템 파일
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100/
+.Trashes/
+
+# 11. Windows 시스템 파일
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# 12. 임시 및 백업 디렉터리
+tmp/
+temp/
+backup/
+backups/
+
+# ==========================================
+# Git으로 관리할 파일
+# ==========================================
+# AGENTS.md
+# README.md
+# TASK_PROGRESS.md
+# docs/
+# src/
+# tests/
+# samples/
+# requirements.txt
+# .gitignore
+
