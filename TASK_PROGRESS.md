@@ -3,7 +3,7 @@
 - **최종 업데이트:** 2026-11-02
 - **현재 진행 단계:** Task 5 자동 검증 통과, Task 1~5 수동 검증은 사용자 요청에 따라 완성본에서 진행 예정
 - **규칙:** 각 Task는 자동 테스트 통과 후 `검토 대기`, 사용자 수동 검증 승인 후 `✅ 완료`로 변경한다. 실패/미검증을 완료로 표시하지 않는다.
-- **수동 검증 계획:** `docs/task별-수동-테스트-명세서.md`의 Task별 체크리스트를 완성본 기준으로 실행한다. 현재 macOS에서는 Task 1 core 로거 간편 확인을 별도로 수행할 수 있다. Windows 전용 항목은 최종 Windows 11 환경에서 판정한다.
+- **수동 검증 계획:** `docs/task별-수동-테스트-명세서.md`의 Task별 체크리스트를 완성본 기준으로 실행한다. 현재 macOS에서는 Task 1 core 로거 간편 확인을 별도로 수행할 수 있다. Task 5 Mock GUI는 Windows 전용 기본 중복 캐시 경로로 macOS 시작이 불가능하여 최종 Windows 11 환경에서 판정한다.
 - **사용자 확정 운영 방식:** 각 Task 종료 후 자동 테스트·체크리스트 갱신·명시적 `git add`·`git commit`·`git push`를 수행한다. Windows 11 수동 검증은 전체 Task 완성 후 사용자가 체크리스트를 실행해 결과를 전달한다. 그 전까지 상태는 `검토 대기`로 두고, 오류가 있으면 전달된 결과를 바탕으로 디버깅한다. macOS에서 바로 확인 가능한 부분은 별도로 안내한다.
 
 ---
@@ -79,7 +79,7 @@
 - **수정 파일:** `main.py`, `src/main.py`, `src/application/__init__.py`, `src/application/workflow.py`, `src/ui/__init__.py`, `src/ui/main_window.py`, `src/ui/widgets/__init__.py`, `src/ui/widgets/alarm_input_pane.py`, `src/ui/widgets/noti_review_pane.py`, `tests/test_task5_ui_workflow.py`, `requirements.txt`, `docs/02-ARCHITECTURE-AND-FILE-MAP.md`, `docs/manual/MANUAL-SPEC.md`, `docs/task별-수동-테스트-명세서.md`, `TASK_PROGRESS.md`.
 - **신규 의존성:** `PySide6-Essentials` (Widgets, QtTest GUI 및 오프스크린 테스트; 전체 PySide6 패키지보다 작음).
 - **자가 수정 내역:** Enter 테스트의 커서 위치를 명시하고, 같은 입력 배치의 중복 전송 및 묶음의 비연속 인덱스 처리 보강.
-- **미해결 위험/범위:** 기본 실행은 `MOCK-` 키를 반환하는 로컬 Mock이며 실 Jira 연결·Worker·등록 장부는 Task 7 범위다. 현장 Jira 계정 ID 및 매핑 파일이 없어 수동 입력 기반 합성 검증만 가능하다. `UNKNOWN`·`PARTIAL_FAILED`는 자동 재등록을 차단하며 실제 수동 대조 절차는 Task 7에서 연결한다. Windows 11 실제 GUI/포커스 검증 미실시.
+- **미해결 위험/범위:** 기본 실행은 `MOCK-` 키를 반환하는 로컬 Mock이며 실 Jira 연결·Worker·등록 장부는 Task 7 범위다. 현장 Jira 계정 ID 및 매핑 파일이 없어 수동 입력 기반 합성 검증만 가능하다. `UNKNOWN`·`PARTIAL_FAILED`는 자동 재등록을 차단하며 실제 수동 대조 절차는 Task 7에서 연결한다. macOS 기본 실행은 Windows 전용 중복 캐시 경로 때문에 `WINDOWS_REQUIRED`로 종료됨을 사용자 실행에서 확인했다. macOS 전용 제품 코드 변경은 적용하지 않고 Windows 11 실제 GUI/포커스 검증까지 보류한다.
 - **수동 검증 방법:** `docs/task별-수동-테스트-명세서.md`의 TASK-05 TC-05A~E 및 05F를 완성본 Windows 11에서 실행. Enter 줄바꿈, 미검토 차단, NoData 통계, 적격 건만 Mock 요청, 명시적 중복 확인, 묶음 확인 게이트와 `MOCK-` 키를 확인한다.
 - **수동 검증 결과:** 완성본에서 사용자 확인 예정. 완료 승인 전.
 

@@ -6,7 +6,7 @@
 - 결과는 각 항목의 `[ ]`를 `[x]`로 바꾸고 실행 날짜, OS, 앱 버전/커밋, `통과·실패·미실행`, 실제 결과와 재현 절차를 별도 사본에 기록한다. 실패 항목은 기대 결과와 실제 결과를 함께 개발자에게 전달한다.
 - 테스트에는 합성 계정·알람·매핑만 사용한다. 실제 토큰, 비밀번호, 사용자 데이터, 로그, `.dat`, `.bak`, Excel 파일을 Git에 올리지 않는다. 테스트용 데이터 폴더는 운영 데이터와 분리한다.
 - Jira 항목은 명시된 **Mock**에서 먼저 확인한다. 실 Jira 생성은 별도 실환경 승인 후 테스트 프로젝트에서만 수행한다. Mock 통과를 실 Jira 연동 완료로 간주하지 않는다.
-- Task 1의 core 로거는 macOS에서 일부 수동 확인이 가능하다. Task 3의 파서와 Task 5의 Mock GUI도 macOS에서 합성 입력으로 확인할 수 있다. Task 2의 Windows DPAPI와 Task 4의 관리자 Excel GUI는 최종 Windows 11 배포본에서 확인한다. Windows 기본 경로, `%LOCALAPPDATA%`, DPAPI·Credential Manager, `.exe` onedir 검증은 Windows 11에서만 판정한다.
+- Task 1의 core 로거는 macOS에서 일부 수동 확인이 가능하다. 현재 Task 5 Mock GUI의 기본 실행은 Windows 전용 중복 캐시 경로를 사용하므로 macOS GUI 수동 검증은 진행하지 않는다. Task 2의 Windows DPAPI, Task 4의 관리자 Excel GUI와 Task 5 GUI는 최종 Windows 11 배포본에서 확인한다. Windows 기본 경로, `%LOCALAPPDATA%`, DPAPI·Credential Manager, `.exe` onedir 검증은 Windows 11에서만 판정한다.
 - 각 Task의 자동 테스트·구현이 끝나면 해당 Task 변경만 명시적으로 스테이징·커밋·푸시한다. 체크리스트의 Windows 수동 검증은 최종 완성 후 사용자가 실행하고 결과를 제공한다. 실패 항목은 그 결과를 바탕으로 디버깅한다.
 - `TASK_PROGRESS.md`의 `완료` 표시는 해당 Task의 자동 검증과 사용자 수동 검증 확인 후에만 변경한다. Windows 전용 항목이 미실행이면 이를 명시하고 완료로 표시하지 않는다.
 
@@ -69,7 +69,7 @@ PY
 
 ## TASK-03 — Grafana 파서·노티 포맷터 (TC-03A~F)
 
-**실행 시점·환경:** macOS에서는 Task 5 Mock GUI에 `samples/grafana-synthetic-input.txt`를 붙여넣어 03A, 03C~03F의 화면 반응을 일부 확인할 수 있다. 로그 기록과 Windows 배포본 동작은 최종 Windows 11에서 판정한다. 실제 Jira 전송은 하지 않는다.
+**실행 시점·환경:** 완성본 Windows 11 GUI에서 `samples/grafana-synthetic-input.txt`의 내용을 입력창에 붙여넣고 아래 결과를 확인한다. 현재 macOS에서는 GUI 기본 실행의 Windows 전용 캐시 경로 때문에 수동 확인을 보류한다. 실제 Jira 전송은 하지 않는다.
 
 - [ ] **03A** 합성 입력 3건을 붙여넣는다. NoData 1건이 제외되고 정상 2건만 검토 목록과 노티에 남는다. 제외 건수·사유가 알림과 로그에 기록된다.
 - [ ] **03B** `Detail`에 `$xxx`가 있으나 NoData 조건은 아닌 입력을 넣는다. 제외되지 않는다.
@@ -96,11 +96,7 @@ PY
 
 **실행:** 임시 Python 환경에서 `python main.py`를 실행하고, 매핑이 없는 합성 알람에는 확인된 테스트용 `Jira accountId`를 입력한 뒤 `수정·검토 저장`한다. 생성 키는 `MOCK-` 접두어인지 확인한다. 화면은 아직 실 Jira 연결을 제공하지 않는다.
 
-**macOS 간편 확인:** 프로젝트 루트에서 아래 명령으로 Mock GUI를 실행한다. 앱 입력창에 `samples/grafana-synthetic-input.txt` 내용을 붙여넣고 `알람 분석`을 누른다. `입력 3건 · 검토 2건 · NoData 제외 1건`을 확인한다. 노티 편집창의 Enter는 줄바꿈만 해야 한다. 합성 `Jira accountId`를 입력하고 건별 `이 알람 검토 완료`를 체크한 뒤 `수정·검토 저장`과 `선택 등록`을 눌러 `MOCK-` 키를 확인한다. 실제 Jira 호출은 없다. Windows 포커스·배포본 동작은 최종 Windows 11에서 다시 판정한다.
-
-```bash
-UV_CACHE_DIR=/private/tmp/noti-uv-cache uv run --with PySide6-Essentials --with cryptography --with openpyxl python main.py
-```
+**Windows 확인:** 완성본 Windows 11 GUI에서 `samples/grafana-synthetic-input.txt`를 붙여넣고 `알람 분석`을 누른다. `입력 3건 · 검토 2건 · NoData 제외 1건`을 확인한다. 노티 편집창의 Enter는 줄바꿈만 해야 한다. 합성 `Jira accountId`를 입력하고 건별 `이 알람 검토 완료`를 체크한 뒤 `수정·검토 저장`과 `선택 등록`을 눌러 `MOCK-` 키를 확인한다. 실제 Jira 호출은 없다.
 
 - [ ] **05A** 노티 편집창에 커서를 두고 Enter를 누른다. 줄바꿈만 일어나고 Jira 전송은 없다.
 - [ ] **05B** 미검토 건에서 Ctrl+Enter를 누른다. 전송되지 않고 검토 필요 이유가 보인다.
