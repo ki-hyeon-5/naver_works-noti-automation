@@ -45,6 +45,9 @@
 `%LOCALAPPDATA%/NotiAutomation/config/` 아래 계정 해시와 보호된 토큰을 관리한다.
 macOS 테스트는 경로와 보호자 객체를 명시적으로 주입한다. AES-GCM은
 `requirements.txt`의 `cryptography`에 의존한다.
+Task 3에서 `src/core/parsers/` 패키지와 `src/core/formatter.py`를 생성하고
+`src/core/models.py`에 파싱 결과 모델을 추가했다. 파서는 Qt·Jira I/O 없이
+원문 문자 범위와 오류코드를 반환한다.
 
 ```text
 src/
@@ -55,7 +58,7 @@ src/
 │   ├── constants.py                 # 정규식, 에러코드, 경로 상수 집중
 │   ├── models.py                    # ParsedAlarm, JiraIssue, Account 등 데이터 클래스
 │   ├── logger.py                    # 3단계 Fallback 날짜별 TXT 로거
-│   ├── crypto_store.py              # AES(Fernet) 파일 암호화 및 PBKDF2 해시
+│   ├── crypto_store.py              # AES-GCM 파일 암호화 및 DPAPI 래핑 키
 │   ├── auth_manager.py              # 회원가입, 로그인, 토큰 초기화형 비밀번호 재설정
 │   ├── parsers/
 │   │   ├── __init__.py

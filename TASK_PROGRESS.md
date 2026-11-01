@@ -1,7 +1,7 @@
 # 개발 진행 현황판 (TASK_PROGRESS.md)
 
 - **최종 업데이트:** 2026-11-02
-- **현재 진행 단계:** Task 2 자동 검증 통과, Task 1·2 수동 검증은 사용자 요청에 따라 완성본에서 진행 예정
+- **현재 진행 단계:** Task 3 자동 검증 통과, Task 1~3 수동 검증은 사용자 요청에 따라 완성본에서 진행 예정
 - **규칙:** 각 Task는 자동 테스트 통과 후 `검토 대기`, 사용자 수동 검증 승인 후 `✅ 완료`로 변경한다. 실패/미검증을 완료로 표시하지 않는다.
 - **수동 검증 계획:** `docs/task별-수동-테스트-명세서.md`의 Task별 체크리스트를 완성본 기준으로 실행한다. 현재 macOS에서는 Task 1 core 로거 간편 확인을 별도로 수행할 수 있다. Windows 전용 항목은 최종 Windows 11 환경에서 판정한다.
 
@@ -13,7 +13,7 @@
 | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
 | **TASK-01** | 상수, 데이터 모델 및 날짜별 TXT 로거 | - | 🔎 검토 대기 | 11 통과 | ⬜ | 3단계 Fallback, 마스킹; Windows 11 실검증 대기 |
 | **TASK-02** | 암호화 저장소 및 계정 관리 (위험수용) | TASK-01 | 🔎 검토 대기 | 9 통과 | ⬜ | Windows DPAPI 실검증·복구 정책 승인 대기 |
-| **TASK-03** | 앵커 기반 Grafana 알람 파서 및 포맷터 | TASK-01 | ⬜ 대기 | - | ⬜ | NoData 제외, 소괄호/대괄호 정제 |
+| **TASK-03** | 앵커 기반 Grafana 알람 파서 및 포맷터 | TASK-01 | 🔎 검토 대기 | 12 통과 | ⬜ | 합성 입력 검증, 실제 클립보드 원문 검증 대기 |
 | **TASK-04** | Excel 2종 임포터 및 담당자 매칭 엔진 | TASK-02, 03 | ⬜ 대기 | - | ⬜ | Grafana/N3R 분리 DB, 충돌 감지 |
 | **TASK-05** | UI 레이아웃 및 확인 후 등록 워크플로우 | TASK-03, 04 | ⬜ 대기 | - | ⬜ | 단일 모드, 포커스 분리, 묶음 선택 |
 | **TASK-06** | 관리자 2탭 매핑 테이블 GUI 및 환경 설정 | TASK-02, 04 | ⬜ 대기 | - | ⬜ | 관리자 인증, Excel Append GUI |
@@ -48,9 +48,15 @@
 - **수동 검증 결과:** 완성본에서 사용자 확인 예정. 완료 승인 전.
 
 ### [TASK-03] 앵커 기반 Grafana 알람 파서 및 포맷터
-- **상태:** ⬜ 대기
+- **상태:** 🔎 검토 대기
 - **상세 지시서:** `docs/tasks/TASK-03.md`
 - **검증 명령:** `pytest tests/test_task3_parser_formatter.py -v`
+- **자동 검증:** TC-03A~TC-03F 포함 12개 통과; 전체 `pytest -v` 32개 통과 (macOS, Python 3.10.20). 합성 3건에서 NoData 1건 제외·정상 2건, 노티·제목 기대값 비교.
+- **수정 파일:** `src/core/models.py`, `src/core/parsers/__init__.py`, `src/core/parsers/base_parser.py`, `src/core/parsers/grafana_parser.py`, `src/core/parsers/scp_parser.py`, `src/core/formatter.py`, `tests/test_task3_parser_formatter.py`, `docs/02-ARCHITECTURE-AND-FILE-MAP.md`, `TASK_PROGRESS.md`.
+- **자가 수정 내역:** 테스트 실패 없음. 전체 회귀 전 명시적 빈 탭 Target 처리와 테스트를 보강.
+- **미해결 위험/범위:** 실제 Grafana 클립보드 원문 미제공. 합성 예시로만 검증했고, 경계를 확정할 수 없는 입력은 `PARSE_AMBIGUOUS`로 반환. SCP는 미지원. UI 붙여넣기·경고 표시·Jira 차단 연결은 후속 Task 범위.
+- **수동 검증 방법:** `docs/task별-수동-테스트-명세서.md`의 TASK-03 TC-03A~F를 완성본 GUI에서 확인. 합성 입력 3건의 제외·노티·제목을 확인하고 실제 클립보드 형식에서는 모호한 입력이 경고와 수동 수정 요청으로 표시되는지 확인.
+- **수동 검증 결과:** 완성본에서 사용자 확인 예정. 완료 승인 전.
 
 ### [TASK-04] Excel 2종 임포터 및 담당자 매칭 엔진
 - **상태:** ⬜ 대기
