@@ -1,0 +1,32 @@
+{
+  "fixture_contract": "grafana-synthetic-input.txt + n3r-mapping-synthetic.json + grafana-mapping-synthetic.json",
+  "expected_input_records": 3,
+  "expected_no_data_excluded": 1,
+  "expected_review_records": 2,
+  "matching_explanation": "bill-db-01 and bill-db-02 match N3R synthetic rows only",
+  "records": [
+    {
+      "target": "bill-db-01",
+      "cluster": "prod-billing-ns",
+      "clean_alert_name": "Disk IO 사용률 기준 초과",
+      "occurred_time": "26-10-11 01:57",
+      "is_no_data": false,
+      "noti_text": "클러스터 : prod-billing-ns\n\n서비스명 : bill-db-01\n\n장애현상 : bill-db-01 서버의 Disk IO 사용률이 *95.20* % 입니다.\n\n발생시간 : 26-10-11 01:57",
+      "jira_summary_single": "[247][N3R] bill-db-01, Disk IO 사용률 기준 초과"
+    },
+    {
+      "target": "-",
+      "is_no_data": true,
+      "note": "NoData 판정으로 검토 목록 및 노티 생성에서 제외됨"
+    },
+    {
+      "target": "bill-db-02",
+      "cluster": null,
+      "clean_alert_name": "CPU 부하율 초과",
+      "occurred_time": "26-10-11 02:15",
+      "is_no_data": false,
+      "noti_text": "서비스명 : bill-db-02\n\n장애현상 : bill-db-02 서버의 CPU 부하율이 88% 입니다.\n\n발생시간 : 26-10-11 02:15",
+      "jira_summary_single": "[247][N3R] bill-db-02, CPU 부하율 초과"
+    }
+  ]
+}

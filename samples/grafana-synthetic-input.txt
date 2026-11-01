@@ -1,0 +1,39 @@
+Firing
+Resolved
+-
+2026-10-11 01:57:20
+4h 30m 29s
+bill-db-01
+[Linux][CRITICAL] Disk IO 사용률 기준 초과(critical)
+prod-billing-ns | bill-db-01 서버의 Disk IO 사용률이 *95.20* % 입니다.
+95.20
+95.20
+CRITICAL
+관리자
+fp_synth_001
+Firing
+Resolved
+NoData
+2026-10-11 02:00:10
+10m 00s
+-
+DataSourceNoData
+데이터 소스 응답 없음
+-
+-
+CRITICAL
+-
+fp_synth_002
+Firing
+--
+-
+2026-10-11 02:15:00
+1h 15m 00s
+bill-db-02
+[Linux] CPU 부하율 초과 (WARNING)
+bill-db-02 서버의 CPU 부하율이 88% 입니다.
+88.0
+88.0
+WARNING
+관리자
+fp_synth_003

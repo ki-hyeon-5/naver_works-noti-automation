@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "rows": [
+    {
+      "id": "G-01",
+      "service": "Unrelated",
+      "assignee": "담당자C",
+      "alert_name": "Unrelated Alert",
+      "description": "가상 데이터"
+    }
+  ]
+}

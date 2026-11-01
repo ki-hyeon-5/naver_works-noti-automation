@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "rows": [
+    {
+      "id": "N-01",
+      "server_name": "bill-db-01",
+      "service_name": "Billing",
+      "purpose": "DB",
+      "assignee": "담당자A"
+    },
+    {
+      "id": "N-02",
+      "server_name": "bill-db-02",
+      "service_name": "Billing",
+      "purpose": "DB",
+      "assignee": "담당자A"
+    }
+  ]
+}
