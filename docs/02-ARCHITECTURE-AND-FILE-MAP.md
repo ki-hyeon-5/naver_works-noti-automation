@@ -48,6 +48,11 @@ macOS 테스트는 경로와 보호자 객체를 명시적으로 주입한다. A
 Task 3에서 `src/core/parsers/` 패키지와 `src/core/formatter.py`를 생성하고
 `src/core/models.py`에 파싱 결과 모델을 추가했다. 파서는 Qt·Jira I/O 없이
 원문 문자 범위와 오류코드를 반환한다.
+Task 4에서 `src/core/excel_importer.py`, `src/core/matcher.py`,
+`src/core/bundle_planner.py`를 생성했다. Excel 읽기와 암호화 저장은
+`ExcelImporter.submit_import()`로 호출자 소유 Worker에 제출할 수 있다.
+매칭은 담당자 표시명과 Jira 계정 식별자를 구분하고, 묶음은 모든 구성원 쌍의
+적합성을 확인한다. Excel 읽기는 `requirements.txt`의 `openpyxl`에 의존한다.
 
 ```text
 src/
