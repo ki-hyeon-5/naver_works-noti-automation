@@ -36,9 +36,15 @@
 
 아래 트리는 전체 목표 구조이다. Task 1에서 생성된 파일은 `src/__init__.py`,
 `src/core/__init__.py`, `src/core/constants.py`, `src/core/models.py`,
-`src/core/logger.py`이다. 나머지 모듈은 후속 Task 범위에 속한다.
+`src/core/logger.py`이다. Task 2에서 `src/core/crypto_store.py`,
+`src/core/auth_manager.py`를 생성했다. 나머지 모듈은 후속 Task 범위에 속한다.
 현재 `FileLogger`는 `LogRecord`를 받아 `LogWriteResult`로 저장 여부와 경고를 반환한다.
 `LogRecord`는 허용된 이벤트 코드와 정형 필드만 포함하며, 예외 메시지는 기록하지 않는다.
+`CryptoStore`는 `%LOCALAPPDATA%/NotiAutomation/data/`의 두 암호화 DB에 AES-GCM으로
+저장하고, DEK는 현재 Windows 사용자 DPAPI로 보호한다. `AuthManager`는
+`%LOCALAPPDATA%/NotiAutomation/config/` 아래 계정 해시와 보호된 토큰을 관리한다.
+macOS 테스트는 경로와 보호자 객체를 명시적으로 주입한다. AES-GCM은
+`requirements.txt`의 `cryptography`에 의존한다.
 
 ```text
 src/
