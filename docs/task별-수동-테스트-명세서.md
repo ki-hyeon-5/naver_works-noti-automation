@@ -119,6 +119,8 @@ PY
 
 **환경:** Mock 응답 시나리오와 Windows 11 onedir 배포본. 실제 Jira 스키마 검증 전에는 Mock만 성공으로 표기한다.
 
+**빌드:** Windows 11에서 Python 빌드 환경에 `pip install -r requirements.txt pytest pyinstaller` 후 저장소 루트에서 `pyinstaller --noconfirm --clean packaging/noti-automation.spec`를 실행한다. `dist/NotiAutomation/NotiAutomation.exe`를 별도 Python 미설치 PC로 복사해 확인한다. 사용자 데이터 경로는 `%LOCALAPPDATA%/NotiAutomation/`이며 배포 폴더 밖이다. 아래 실패 시나리오는 Mock 어댑터 주입 자동 테스트로 재현하며, 일반 GUI에는 실패 시나리오 선택 기능이 없다.
+
 - [ ] **07A** Mock create 201과 후속 담당자 지정 성공을 재현한다. 완료 상태가 표시되고 해당 건 create 호출은 1회다.
 - [ ] **07B** create 성공 뒤 watcher 실패를 재현한다. 부분실패로 표시되고 생성된 이슈 키가 남으며 create 재호출은 없다.
 - [ ] **07C** timeout/응답 유실을 재현한다. 생성여부불명으로 표시되고 자동 재전송되지 않으며 재시작 후에도 상태가 남는다.

@@ -62,6 +62,10 @@ Task 6에서 `src/core/mapping_admin.py`와 `src/core/settings_store.py`를 추�
 DPAPI 보호 파일에 보관한다. `src/ui/auth_dialog.py`, `admin_dialog.py`,
 `settings_dialog.py`는 Windows 진입점과 메인 메뉴에 연결된다. Excel 가져오기는
 호출자 소유 Executor에서 실행하며 실 Jira 필드는 여전히 Mock 상태다.
+Task 7에서 `src/core/jira_client.py`의 Mock 어댑터·상태 머신과
+`src/core/registration_journal.py`의 원자적 등록 장부를 연결했다. 실제 Jira
+필드 검증 전에는 Mock만 실행한다. `src/ui/workers.py`는 Jira 등록을 QThread에서
+실행하며, `packaging/noti-automation.spec`는 Windows onedir 빌드 정의다.
 
 ```text
 src/
@@ -79,6 +83,7 @@ src/
 │   ├── auth_manager.py              # 회원가입, 로그인, 토큰 초기화형 비밀번호 재설정
 │   ├── mapping_admin.py             # 관리자 승인 게이트와 암호화 매핑 CRUD
 │   ├── settings_store.py            # 세션별 비밀값 제외 설정 JSON 저장
+│   ├── registration_journal.py      # Jira 요청 전후 상태 원자적 장부
 │   ├── parsers/
 │   │   ├── __init__.py
 │   │   ├── base_parser.py           # 파서 추상 인터페이스
@@ -87,7 +92,7 @@ src/
 │   ├── formatter.py                 # 노티 본문 및 Jira Summary 생성기
 │   ├── matcher.py                   # Grafana/N3R 매칭, 충돌 감지, set 기반 중복 탐지
 │   ├── excel_importer.py            # openpyxl 기반 Excel Append 및 중복 검증
-│   └── jira_client.py               # Jira REST API 어댑터, 6단계 상태 머신
+│   └── jira_client.py               # Mock 어댑터, Jira 상태 머신·실서버 게이트
 └── ui/
     ├── __init__.py
     ├── workers.py                   # QThread 비동기 작업 래퍼
@@ -99,6 +104,7 @@ src/
         ├── alarm_input_pane.py      # 알람 텍스트 입력 및 통계 표시
         └── noti_review_pane.py      # 노티 미리보기, 수정, 개별/묶음 토글
 main.py                            # 루트 실행 진입점
+packaging/noti-automation.spec      # Windows PyInstaller onedir 설정
 ```
 
 ---

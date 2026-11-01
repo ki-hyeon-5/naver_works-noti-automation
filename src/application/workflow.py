@@ -9,6 +9,7 @@ from src.core.formatter import bundle_body, bundle_summary, jira_summary, noti_b
 from src.core.matcher import AssigneeIdentity, DuplicateCacheError, DuplicateDetector, MappingMatcher
 from src.core.models import ParsedAlarm, ParseBatchResult
 from src.core.parsers.grafana_parser import GrafanaParser
+from src.core.registration_journal import JournalError
 
 
 @dataclass
@@ -33,6 +34,7 @@ class Submission:
     body: str
     jira_account_id: str
     source_tag: str | None
+    alarm_keys: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -142,6 +144,13 @@ class Workflow:
             reasons.append(f"STATUS_{item.status}")
         if item.status in ("UNKNOWN", "PARTIAL_FAILED"):
             reasons.append("MANUAL_RECONCILIATION_REQUIRED")
+        if self.sender is not None and hasattr(self.sender, "blocking_reason") and item.alarm.can_register:
+            try:
+                reason = self.sender.blocking_reason((self.detector._key(item.alarm),))
+                if reason:
+                    reasons.append(reason)
+            except JournalError as exc:
+                reasons.append(exc.code)
         try:
             if item.alarm.can_register and self.detector.is_duplicate(item.alarm, self.today()) and not item.duplicate_confirmed:
                 reasons.append("DUPLICATE_CONFIRM_REQUIRED")
@@ -176,7 +185,8 @@ class Workflow:
             request = Submission(group_indices,
                                  bundle_summary(alarms, first.source_tag) if len(alarms) > 1 else jira_summary(alarms[0], first.source_tag),
                                  bundle_body(alarms) if len(alarms) > 1 else first.body,
-                                 first.assignee.jira_account_id, first.source_tag)
+                                 first.assignee.jira_account_id, first.source_tag,
+                                 tuple(self.detector._key(alarm) for alarm in alarms))
             for i in group_indices:
                 self.items[i].status = "REQUESTING"
             try:
@@ -188,7 +198,13 @@ class Workflow:
             for i in group_indices:
                 item = self.items[i]
                 item.status, item.jira_key = status, key
-                item.action = "Jira에서 수동 대조하세요." if status in ("UNKNOWN", "PARTIAL_FAILED") else ""
+                code = getattr(getattr(self.sender, "last_result", None), "code", "")
+                if status in ("UNKNOWN", "PARTIAL_FAILED"):
+                    item.action = f"{code}: Jira에서 생성 여부와 기존 이슈를 수동 대조하세요."
+                elif status == "FAILED":
+                    item.action = f"{code}: Jira 설정·권한·필드를 확인하세요."
+                else:
+                    item.action = ""
                 if status in ("DONE", "PARTIAL_FAILED"):
                     try:
                         self.detector.mark(item.alarm, self.today())

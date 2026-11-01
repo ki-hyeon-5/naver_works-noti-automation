@@ -1,6 +1,6 @@
 """Single review mode GUI with explicit registration controls."""
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QThread
 from PySide6.QtGui import QAction, QShortcut, QKeySequence
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QListWidget,
                                QMainWindow, QMessageBox, QPushButton, QRadioButton,
@@ -18,15 +18,18 @@ from .admin_dialog import AdminDialog
 from .settings_dialog import SettingsDialog
 from .widgets.alarm_input_pane import AlarmInputPane
 from .widgets.noti_review_pane import NotiReviewPane
+from .workers import SubmissionWorker
 
 
 class MainWindow(QMainWindow):
     def __init__(self, workflow: Workflow | None = None, *, auth=None, session=None,
-                 mapping_store=None, settings_store=None):
+                 mapping_store=None, settings_store=None, async_submission=False):
         super().__init__()
         self.workflow = workflow or Workflow()
         self.auth, self.session = auth, session
         self.mapping_store, self.settings_store = mapping_store, settings_store
+        self.async_submission = async_submission
+        self._submit_thread = None
         self.setWindowTitle("Noti Automation — 확인 후 등록")
         self.resize(1100, 740)
         root = QWidget()
@@ -95,6 +98,8 @@ class MainWindow(QMainWindow):
             self.workflow.default_assignee = (AssigneeIdentity(saved.default_assignee_name,
                                                        saved.default_assignee_account_id)
                                               if saved.default_assignee_account_id else None)
+            if hasattr(self.workflow.sender, "settings"):
+                self.workflow.sender.settings = saved
         except SettingsError as exc:
             self.notice.setText(f"{exc.code}: {exc.action}")
 
@@ -164,9 +169,14 @@ class MainWindow(QMainWindow):
                      for member in group.members) for group in plan.groups))
 
     def show_reasons(self, index):
-        self.review.reason.setText("등록 차단: " + ", ".join(self.workflow.reasons(index)) if self.workflow.reasons(index) else "등록 가능")
+        item = self.workflow.items[index]
+        reasons = self.workflow.reasons(index)
+        self.review.reason.setText(("등록 차단: " + ", ".join(reasons) if reasons else "등록 가능") +
+                                   ("\n" + item.action if item.action else ""))
 
     def register(self, all_items):
+        if self._submit_thread is not None:
+            return
         self.save_current()
         index = self.list.currentRow()
         if not all_items and index < 0:
@@ -177,8 +187,35 @@ class MainWindow(QMainWindow):
                 answer = QMessageBox.question(self, "중복 재등록 확인", f"{i + 1}번 알람을 다시 등록할까요?")
                 if answer == QMessageBox.Yes:
                     self.workflow.items[i].duplicate_confirmed = True
-        result = self.workflow.submit(indices)
+        if self.async_submission:
+            self._submit_thread = QThread(self)
+            self._submit_worker = SubmissionWorker(self.workflow, indices)
+            self._submit_worker.moveToThread(self._submit_thread)
+            self._submit_thread.started.connect(self._submit_worker.run)
+            self._submit_worker.finished.connect(lambda result: self._submission_finished(result, index))
+            self._submit_worker.failed.connect(self.notice.setText)
+            self._submit_worker.finished.connect(self._submit_thread.quit)
+            self._submit_worker.failed.connect(self._submit_thread.quit)
+            self._submit_thread.finished.connect(self._submit_worker.deleteLater)
+            self._submit_thread.finished.connect(self._submission_thread_done)
+            for button in (self.register_one, self.register_all, self.input.parse_button,
+                           self.save_review, self.review_all):
+                button.setEnabled(False)
+            self.notice.setText("Mock Jira 요청 중…")
+            self._submit_thread.start()
+            return
+        self._submission_finished(self.workflow.submit(indices), index)
+
+    def _submission_finished(self, result, index):
         for i, item in enumerate(self.workflow.items):
             self.list.item(i).setText(f"{i + 1}. {item.alarm.target} · {item.status} · {item.jira_key or '-'}")
         self.notice.setText(f"Mock 요청 {len(result.submitted)}건 · 차단 {len(result.blocked)}건: {result.blocked}")
         self.select(index)
+
+    def _submission_thread_done(self):
+        self._submit_thread.deleteLater()
+        self._submit_thread = None
+        self._submit_worker = None
+        for button in (self.register_one, self.register_all, self.input.parse_button,
+                       self.save_review, self.review_all):
+            button.setEnabled(True)

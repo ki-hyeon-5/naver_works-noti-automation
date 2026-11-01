@@ -1,7 +1,7 @@
 # 개발 진행 현황판 (TASK_PROGRESS.md)
 
 - **최종 업데이트:** 2026-11-02
-- **현재 진행 단계:** Task 6 자동 검증 통과, Task 1~6 수동 검증은 사용자 요청에 따라 완성본에서 진행 예정
+- **현재 진행 단계:** Task 7 자동 검증 통과, Task 1~7 수동 검증은 사용자 요청에 따라 완성본에서 진행 예정
 - **규칙:** 각 Task는 자동 테스트 통과 후 `검토 대기`, 사용자 수동 검증 승인 후 `✅ 완료`로 변경한다. 실패/미검증을 완료로 표시하지 않는다.
 - **수동 검증 계획:** `docs/task별-수동-테스트-명세서.md`의 Task별 체크리스트를 완성본 기준으로 실행한다. 현재 macOS에서는 Task 1 core 로거 간편 확인을 별도로 수행할 수 있다. Task 5 Mock GUI는 Windows 전용 기본 중복 캐시 경로로 macOS 시작이 불가능하여 최종 Windows 11 환경에서 판정한다.
 - **사용자 확정 운영 방식:** 각 Task 종료 후 자동 테스트·체크리스트 갱신·명시적 `git add`·`git commit`·`git push`를 수행한다. Windows 11 수동 검증은 전체 Task 완성 후 사용자가 체크리스트를 실행해 결과를 전달한다. 그 전까지 상태는 `검토 대기`로 두고, 오류가 있으면 전달된 결과를 바탕으로 디버깅한다. macOS에서 바로 확인 가능한 부분은 별도로 안내한다.
@@ -18,7 +18,7 @@
 | **TASK-04** | Excel 2종 임포터 및 담당자 매칭 엔진 | TASK-02, 03 | 🔎 검토 대기 | 13 통과 | ⬜ | 합성 Excel 검증, Windows GUI 수동 검증 대기 |
 | **TASK-05** | UI 레이아웃 및 확인 후 등록 워크플로우 | TASK-03, 04 | 🔎 검토 대기 | 7 통과 | ⬜ | Mock 전송만 지원, Windows GUI 수동 검증 대기 |
 | **TASK-06** | 관리자 2탭 매핑 테이블 GUI 및 환경 설정 | TASK-02, 04 | 🔎 검토 대기 | 9 통과 | ⬜ | Windows DPAPI·GUI 수동 검증 대기 |
-| **TASK-07** | Jira 연동 클라이언트 (Mock/실서버) & 패키징 | TASK-05, 06 | ⬜ 대기 | - | ⬜ | 6단계 상태머신, onedir 패키징 |
+| **TASK-07** | Jira 연동 클라이언트 (Mock/실서버) & 패키징 | TASK-05, 06 | 🔎 검토 대기 | 12 통과 | ⬜ | Mock 상태머신·장부, Windows onedir 실검증 대기 |
 | **TASK-08** | 오프라인 HTML 기능명세 및 사용설명서 | TASK-07 | ⬜ 대기 | - | ⬜ | file:// 호환, 검색, UI 동기화 |
 
 ---
@@ -96,9 +96,15 @@
 - **수동 검증 결과:** 최종 완성 후 사용자 확인 예정. 완료 승인 전.
 
 ### [TASK-07] Jira 연동 클라이언트 및 onedir 패키징
-- **상태:** ⬜ 대기
+- **상태:** 🔎 검토 대기
 - **상세 지시서:** `docs/tasks/TASK-07.md`
 - **검증 명령:** `pytest tests/test_task7_jira_client.py -v`
+- **자동 검증:** TC-07A~G 관련 12개 통과; 전체 `python -m pytest -q` 73개 통과 (macOS, uv 임시 환경). Windows onedir 실행은 미검증.
+- **수정 파일:** `src/core/jira_client.py`, `src/core/registration_journal.py`, `src/application/workflow.py`, `src/ui/workers.py`, `src/ui/main_window.py`, `src/main.py`, `packaging/noti-automation.spec`, `tests/test_task7_jira_client.py`, `docs/02-ARCHITECTURE-AND-FILE-MAP.md`, `docs/manual/MANUAL-SPEC.md`, `docs/task별-수동-테스트-명세서.md`, `TASK_PROGRESS.md`.
+- **신규 의존성:** 런타임 없음. Windows 배포 빌드에만 PyInstaller 필요.
+- **미해결 위험/범위:** 실 Jira 종류·필드·권한 미확정으로 Mock만 전송 가능. HTTP 오류는 주입된 Mock 어댑터로 분류 검증했으며 실서버 통합 테스트를 수행하지 않았다. Windows onedir 빌드 및 DPAPI·재시작 유지 검증은 최종 Windows 11에서 사용자 확인 필요. 다른 PC의 독립 장부 간 전역 중복 방지는 보장하지 않는다.
+- **수동 검증 방법:** `docs/task별-수동-테스트-명세서.md`의 TC-07A~G를 따른다. Mock 정상 GUI는 `MOCK-` 키와 재시작 후 중복·미확정 게이트를 확인한다. timeout·watcher 실패는 테스트 주입 시나리오로 확인한다. Windows에서 PyInstaller onedir 빌드 후 Python 없는 PC에서 실행하고 배포 폴더 교체 후 `%LOCALAPPDATA%/NotiAutomation/` 데이터 유지 확인.
+- **수동 검증 결과:** 최종 완성 후 사용자 확인 예정. 완료 승인 전.
 
 ### [TASK-08] 오프라인 HTML 기능명세 및 사용설명서
 - **상태:** ⬜ 대기
